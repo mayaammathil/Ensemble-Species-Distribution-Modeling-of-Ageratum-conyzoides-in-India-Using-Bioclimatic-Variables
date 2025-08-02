@@ -1,0 +1,26 @@
+library(terra)
+
+# Load the ensemble raster prediction
+ensemble_rasterCURRENT <- get_predictions(myBiomodEMProj)
+
+# Convert to SpatRaster if needed
+ensemble_rasterCURRENT <- rast(ensemble_rasterCURRENT)
+
+# Define a threshold for high probability areas (customize if needed)
+high_prob_threshold <- 0.7
+
+# Create a binary mask: 1 if cell >= threshold, else NA
+high_prob_mask <- ensemble_rasterCURRENT >= high_prob_threshold
+
+# Calculate area for each cell (returns values in km² by default if CRS is geographic)
+cell_areas <- expanse(high_prob_mask, unit = "km")
+
+# Total area of all suitable (i.e., TRUE) cells
+high_prob_area <- sum(cell_areas, na.rm = TRUE)
+
+# Total area of the raster (including all cells, not just suitable)
+total_area <- sum(expanse(ensemble_rasterCURRENT, unit = "km"), na.rm = TRUE)
+
+# Print results
+cat("Total Area of Raster:", total_area, "km²\n")
+cat("Area of High Probability Habitat:", high_prob_area, "km²\n")
